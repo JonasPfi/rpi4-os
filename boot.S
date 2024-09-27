@@ -1,30 +1,34 @@
-.section ".text.boot"  // Make sure the linker puts this at the start of the kernel image
+// AArch64 mode
 
-.global _start  // Execution starts here
+// To keep this in the first portion of the binary.
+.section ".text.boot"
 
+// Make _start global.
+.globl _start
+
+    .org 0x80000
+// Entry point for the kernel. Registers:
+// x0 -> 32 bit pointer to DTB in memory (primary core only) / 0 (secondary cores)
+// x1 -> 0
+// x2 -> 0
+// x3 -> 0
+// x4 -> 32 bit kernel entry point, _start location
 _start:
-    // Check processor ID is zero (executing on main core), else hang
-    mrs     x1, mpidr_el1
-    and     x1, x1, #3
-    cbz     x1, 2f
-    // We're not on the main core, so hang in an infinite wait loop
-1:  wfe
-    b       1b
-2:  // We're on the main core!
+    // set stack before our code
+    ldr     x5, =_start
+    mov     sp, x5
 
-    // Set stack to start below our code
-    ldr     x1, =_start
-    mov     sp, x1
+    // clear bss
+    ldr     x5, =__bss_start
+    ldr     w6, =__bss_size
+1:  cbz     w6, 2f
+    str     xzr, [x5], #8
+    sub     w6, w6, #1
+    cbnz    w6, 1b
 
-    // Clean the BSS section
-    ldr     x1, =__bss_start     // Start address
-    ldr     w2, =__bss_size      // Size of the section
-3:  cbz     w2, 4f               // Quit loop if zero
-    str     xzr, [x1], #8
-    sub     w2, w2, #1
-    cbnz    w2, 3b               // Loop if non-zero
-
-    // Jump to our main() routine in C (make sure it doesn't return)
-4:  bl      main
-    // In case it does return, halt the master core too
-    b       1b
+    // jump to C code, should not return
+2:  bl      kernel_main
+    // for failsafe, halt this core
+halt:
+    wfe
+    b halt
