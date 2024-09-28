@@ -22,7 +22,7 @@ unsigned int mmio_read(long reg) { return *(volatile unsigned int *)reg; }
 
 unsigned int gpio_call(unsigned int pin_number, unsigned int value, unsigned int base, unsigned int field_size, unsigned int field_max) {
     unsigned int field_mask = (1 << field_size) - 1;
-  
+
     if (pin_number > field_max) return 0;
     if (value > field_mask) return 0; 
 

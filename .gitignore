@@ -1,52 +1,26 @@
-# Prerequisites
-*.d
+# Build artifacts
+kernel8.img
+kernel8.elf
+*.o
 
 # Object files
-*.o
-*.ko
-*.obj
-*.elf
+kernel/kernel/*.o
+kernel/arch/aarch64-elf/*.o
 
-# Linker output
-*.ilk
-*.map
-*.exp
+# Temporary files
+*.tmp
+*.bak
 
-# Precompiled Headers
-*.gch
-*.pch
+# IDE-specific files
+.vscode/
+*.sublime-workspace
+*.sublime-project
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
+# Logs
+*.log
 
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
+# MacOS system files
+.DS_Store
 
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
-
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
-
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
+# Backup files
+*~
