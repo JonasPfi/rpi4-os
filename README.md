@@ -21,14 +21,6 @@ This project uses a Makefile to automate the build process and generate the `ker
 To build the project, run the following command in the directory containing the Makefile:
 
 ```bash
-make
-```
-
-## Cleaning
-
-To remove generated files (e.g., `kernel8.elf`, `.o`, and `.img` files), run:
-
-```bash
-make clean
+./make.sh
 ```
 
