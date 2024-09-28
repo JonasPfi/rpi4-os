@@ -2,7 +2,7 @@
 
 # Build Instructions
 
-This project uses a Makefile to automate the build process and generate the `kernel8.img` file. Follow the steps below to successfully compile the project:
+This project uses a sh to automate the build process and generate the `kernel8.img` file. Follow the steps below to successfully compile the project:
 
 ## Prerequisites
 
@@ -21,6 +21,6 @@ This project uses a Makefile to automate the build process and generate the `ker
 To build the project, run the following command in the directory containing the Makefile:
 
 ```bash
-./make.sh
+./build.sh
 ```
 
