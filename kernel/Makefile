@@ -9,15 +9,15 @@ CFILES := $(wildcard $(SRC_DIR)/*.c) $(wildcard $(ARCH_DIR)/*.c) $(wildcard $(LI
 OFILES := $(CFILES:.c=.o)
 
 # Compiler and flags
-GCCFLAGS := -Wall -nostdlib -nostartfiles -ffreestanding -Iinclude -I$(INC_DIR)
+GCCFLAGS := -Wall -nostdlib -nostartfiles -ffreestanding -g -I$(INC_DIR)
 GCCPATH := /usr/share/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf/bin
 
 # Targets
-all: clean kernel8.img
+all: kernel8.img
 
 # Assembly source file
 $(ARCH_DIR)/boot.o: $(ARCH_DIR)/boot.S
-	$(GCCPATH)/aarch64-none-elf-gcc $(GCCFLAGS) -c $(ARCH_DIR)/boot.S -o $(ARCH_DIR)/boot.o
+	$(GCCPATH)/aarch64-none-elf-gcc $(GCCFLAGS) -c $< -o $@
 
 # C source files
 $(SRC_DIR)/%.o: $(SRC_DIR)/%.c
@@ -36,4 +36,4 @@ kernel8.img: $(ARCH_DIR)/boot.o $(OFILES)
 
 # Clean up
 clean:
-	/bin/rm -f kernel8.elf $(ARCH_DIR)/*.o $(SRC_DIR)/*.o $(LIB_DIR)/*.o kernel8.img > /dev/null 2> /dev/null || true
+	/bin/rm -f kernel8.elf $(ARCH_DIR)/*.o $(SRC_DIR)/*.o $(LIB_DIR)/*.o kernel8.img > /dev/null 2>&1 || true
