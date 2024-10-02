@@ -84,9 +84,9 @@ void uart_init() {
 unsigned int uart_isWriteByteReady() { return mmio_read(AUX_MU_LSR_REG) & 0x20; }
 unsigned int uart_isReadByteReady() { return mmio_read(AUX_MU_LSR_REG) & 0x01; }
 
-void uart_writeByteBlockingActual(unsigned char ch) {
+void uart_writeByteBlockingActual(unsigned char c) {
     while (!uart_isWriteByteReady());
-    mmio_write(AUX_MU_IO_REG, (unsigned int)ch);
+    mmio_write(AUX_MU_IO_REG, (unsigned int)c);
 }
 
 char uart_readByteBlockingActual(void) {
@@ -101,5 +101,7 @@ void uart_writeText(char *buffer) {
     }
 }
 
-
-
+// Requirement for printf
+void putc(void* p, unsigned char c){
+    uart_writeByteBlockingActual(c);
+}
