@@ -1,4 +1,4 @@
-# Teardrop-OS
+# rpi4-os
 
 # Build Instructions
 
