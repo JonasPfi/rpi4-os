@@ -1,6 +1,6 @@
 # Define directories
 SRC_DIR := kernel
-ARCH_DIR := arch/aarch64-elf
+ARCH_DIR := arch
 INC_DIR := include
 LIB_DIR := lib
 
@@ -17,7 +17,7 @@ all: kernel8.img
 
 # Assembly source file
 $(ARCH_DIR)/boot.o: $(ARCH_DIR)/boot.S
-	$(GCCPATH)/aarch64-none-elf-gcc $(GCCFLAGS) -c $< -o $@
+	$(GCCPATH)/aarch64-none-elf-gcc -Wall -nostdlib -nostartfiles -ffreestanding -g -I$(ARCH_DIR) -c $< -o $@
 
 # C source files
 $(SRC_DIR)/%.o: $(SRC_DIR)/%.c
