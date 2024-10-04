@@ -1,3 +1,5 @@
+#include "sysregs.h"
+
 .section ".text.boot"  // Make sure the linker puts this at the start of the kernel image
 
 .global _start  // Execution starts here
@@ -12,58 +14,51 @@ _start:
     b       1b
 2:  // We're on the main core!
 
-    // set up EL1
-    mrs     x0, CurrentEL
-    and     x0, x0, #12
-    // running at EL3?
-    cmp     x0, #12
-    bne     1f
-    msr     sp_el2, x1
-    mov     x2, #0x5b1
-    msr     scr_el3, x2
-    mov     x2, #0x3c9
-    msr     spsr_el3, x2
-    adr     x2, 1f
-    msr     elr_el3, x2
-    eret
-    // running at EL2?
-1:  cmp     x0, #4
-    beq     1f
-    msr     sp_el1, x1
-    // enable CNTP for EL1
-    mrs     x0, cnthctl_el2
-    orr     x0, x0, #3
-    msr     cnthctl_el2, x0
-    msr     cnthp_ctl_el2, xzr
-    // initialize virtual MPIDR
-    mrs     x0, midr_el1
-    mrs     x2, mpidr_el1
-    msr     vpidr_el2, x0
-    msr     vmpidr_el2, x2
-    // disable coprocessor traps
-    mov     x0, #0x33FF
-    msr     cptr_el2, x0
-    msr     hstr_el2, xzr
-    mov     x0, #(3 << 20)
-    msr     cpacr_el1, x0
-    // enable AArch64 in EL1
-    mov     x0, #(1 << 31)      // AArch64
-    orr     x0, x0, #(1 << 1)   // SWIO
-    msr     hcr_el2, x0
-    mrs     x0, hcr_el2
-    // Setup SCTLR access
-    mov     x2, #0x0800
-    movk    x2, #0x30d0, lsl #16
-    msr     sctlr_el1, x2
-    // change exception level to EL1
-    mov     x2, #0x3c4
-    msr     spsr_el2, x2
-    adr     x2, 1f
-    msr     elr_el2, x2
-    eret
+    // Initialize SP_EL1
+    msr     sp_el1, x1            // Set stack pointer for EL1
 
+    // Enable CNTP for EL1
+    mrs     x0, cnthctl_el2       // Read CNTP control from EL2
+    orr     x0, x0, #3            // Set the counter enable bits
+    msr     cnthctl_el2, x0       // Write back to CNTP control
+    msr     cnthp_ctl_el2, xzr     // Disable CNTHP control
 
-1:
+    // Initialize virtual MPIDR
+    mrs     x0, midr_el1          // Read MIDR from EL1
+    mrs     x2, mpidr_el1         // Read MPIDR from EL1
+    msr     vpidr_el2, x0         // Set virtual MPIDR in EL2
+    msr     vmpidr_el2, x2        // Set virtual MPIDR in EL2
+
+    // Disable coprocessor traps
+    mov     x0, #0x33FF           // Prepare value to disable traps
+    msr     cptr_el2, x0          // Write to CPTR to disable traps
+    msr     hstr_el2, xzr         // Clear HSTR
+
+    // Enable FP/SIMD at EL1
+    mov     x0, #(3 << 20)        // Enable FP/SIMD access at EL1
+    msr     cpacr_el1, x0         // Write to CPACR
+
+    // Enable AArch64 mode in EL1
+    mov     x0, #(1 << 31)        // Set AArch64 mode
+    orr     x0, x0, #(1 << 1)     // Set SWIO
+    msr     hcr_el2, x0           // Write to HCR to configure
+
+    // Set SCTLR for EL1
+    ldr     x0, =SCTLR_VALUE_MMU_DISABLED // Load SCTLR value
+    msr     sctlr_el1, x0         // Write to SCTLR for EL1
+
+    // Set SPSR for the switch to EL1
+    ldr     x0, =SPSR_VALUE       // Load SPSR value
+    msr     spsr_el2, x0          // Write to SPSR
+
+    // Set target address for EL1 entry
+    adr     x0, el1_entry         // Load address of EL1 entry point
+    msr     elr_el2, x0           // Set ELR for EL2
+
+    // Change exception level to EL1
+    eret                          // Execute return from exception
+
+el1_entry:
     // Set stack to start below our code
     ldr     x1, =_start
     mov     sp, x1
