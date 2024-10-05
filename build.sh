@@ -14,4 +14,6 @@ make
 # Move the resulting kernel image to the build directory
 mv build/kernel8.img ../build/
 
+make clean
+
 echo "Build completed successfully. Kernel image is located in the 'build' directory."

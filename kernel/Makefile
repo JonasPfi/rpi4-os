@@ -7,10 +7,10 @@ BUILD_DIR = build
 SRC_DIR = src
 BOOT_DIR = booting
 
-all : kernel8.img
+all: kernel8.img
 
-clean :
-	rm -rf $(BUILD_DIR)/*.o *.img kernel8.elf
+clean:
+	rm -rf $(BUILD_DIR)/*.o $(BUILD_DIR)/*.d $(BUILD_DIR)/*.img $(BUILD_DIR)/kernel8.elf
 
 $(BUILD_DIR)/%_c.o: $(SRC_DIR)/%.c
 	mkdir -p $(@D)
@@ -30,4 +30,4 @@ DEP_FILES = $(OBJ_FILES:%.o=%.d)
 
 kernel8.img: $(BOOT_DIR)/link.ld $(OBJ_FILES)
 	$(ARMGNU)-ld -T $(BOOT_DIR)/link.ld -o $(BUILD_DIR)/kernel8.elf  $(OBJ_FILES)
-	$(ARMGNU)-objcopy $(BUILD_DIR)/kernel8.elf -O binary kernel8.img
+	$(ARMGNU)-objcopy $(BUILD_DIR)/kernel8.elf -O binary $(BUILD_DIR)/kernel8.img
