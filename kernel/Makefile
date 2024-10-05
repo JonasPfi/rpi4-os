@@ -1,42 +1,33 @@
-TOOLCHAIN_PATH = /usr/share/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf/bin
-ASM = aarch64-none-elf-gcc
-CXX = aarch64-none-elf-gcc
-LINKER = aarch64-none-elf-ld
-OBJCPY = aarch64-none-elf-objcopy
+ARMGNU ?= aarch64-elf
 
-SRC_DIR = src
+COPS = -Wall -nostdlib -nostartfiles -ffreestanding -Iinclude -mgeneral-regs-only
+ASMOPS = -Iinclude 
+
 BUILD_DIR = build
-BOOTING_DIR = booting
-INCLUDE_DIR = include
+SRC_DIR = src
+BOOT_DIR = booting
 
-CFILES = $(wildcard $(SRC_DIR)/*.c)
-ASMFILES = $(wildcard $(SRC_DIR)/*.S) $(wildcard $(BOOTING_DIR)/*.S)
-OFILES = $(CFILES:.c=.o) $(ASMFILES:.S=.o)
-INCLUDES = -I$(INCLUDE_DIR)
-GCCFLAGS = -Wall -O0 -ffreestanding -nostdinc -nostdlib -nostartfiles $(INCLUDES)
-LDFLAGS = -nostdlib $(INCLUDES)
+all : kernel8.img
 
-all: clean $(BUILD_DIR)/kernel8.img
+clean :
+	rm -rf $(BUILD_DIR)/*.o *.img kernel8.elf
 
-# Create boot.S
-$(BUILD_DIR)/boot.o: $(BOOTING_DIR)/boot.S
-	$(TOOLCHAIN_PATH)/$(ASM) $(GCCFLAGS) -c $< -o $@
+$(BUILD_DIR)/%_c.o: $(SRC_DIR)/%.c
+	mkdir -p $(@D)
+	$(ARMGNU)-gcc $(COPS) -MMD -c $< -o $@
 
-# All C to o
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
-	$(TOOLCHAIN_PATH)/$(CXX) $(GCCFLAGS) -c $< -o $@
+$(BUILD_DIR)/%_s.o: $(BOOT_DIR)/%.S
+	mkdir -p $(@D)
+	$(ARMGNU)-gcc $(ASMOPS) -MMD -c $< -o $@
 
-# All S to o
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.S
-	$(TOOLCHAIN_PATH)/$(ASM) $(GCCFLAGS) -c $< -o $@
+C_FILES = $(wildcard $(SRC_DIR)/*.c)
+ASM_FILES = $(wildcard $(BOOT_DIR)/*.S)
+OBJ_FILES = $(C_FILES:$(SRC_DIR)/%.c=$(BUILD_DIR)/%_c.o)
+OBJ_FILES += $(ASM_FILES:$(BOOT_DIR)/%.S=$(BUILD_DIR)/%_s.o)
 
-$(BUILD_DIR)/%.o: $(BOOTING_DIR)/%.S
-	$(TOOLCHAIN_PATH)/$(ASM) $(GCCFLAGS) -c $< -o $@
+DEP_FILES = $(OBJ_FILES:%.o=%.d)
+-include $(DEP_FILES)
 
-$(BUILD_DIR)/kernel8.img: $(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o
-	$(TOOLCHAIN_PATH)/$(LINKER) $(LDFLAGS) $(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o -T $(BOOTING_DIR)/link.ld -o $(BUILD_DIR)/kernel8.elf
-	$(TOOLCHAIN_PATH)/$(OBJCPY) -O binary $(BUILD_DIR)/kernel8.elf $(BUILD_DIR)/kernel8.img
-
-clean:
-	rm -rf $(BUILD_DIR)/kernel8.img
-	rm -rf $(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel8.elf $(OFILES)
+kernel8.img: $(BOOT_DIR)/link.ld $(OBJ_FILES)
+	$(ARMGNU)-ld -T $(BOOT_DIR)/link.ld -o $(BUILD_DIR)/kernel8.elf  $(OBJ_FILES)
+	$(ARMGNU)-objcopy $(BUILD_DIR)/kernel8.elf -O binary kernel8.img
