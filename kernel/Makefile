@@ -1,43 +1,42 @@
-# Define directories
-SRC_DIR := kernel
-ARCH_DIR := arch
-INC_DIR := include
-LIB_DIR := lib
+TOOLCHAIN_PATH = /usr/share/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf/bin
+ASM = aarch64-none-elf-gcc
+CXX = aarch64-none-elf-gcc
+LINKER = aarch64-none-elf-ld
+OBJCPY = aarch64-none-elf-objcopy
 
-# Source files
-CFILES := $(wildcard $(SRC_DIR)/*.c) $(wildcard $(ARCH_DIR)/*.c) $(wildcard $(LIB_DIR)/*.c)
-SFILES := $(wildcard $(ARCH_DIR)/*.S) $(wildcard $(LIB_DIR)/*.S)
-OFILES := $(CFILES:.c=.o) $(SFILES:.S=.o)
+SRC_DIR = src
+BUILD_DIR = build
+BOOTING_DIR = booting
+INCLUDE_DIR = include
 
-# Compiler and flags
-GCCFLAGS := -Wall -nostdlib -nostartfiles -ffreestanding -g -I$(INC_DIR)
-GCCPATH := /usr/share/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf/bin
+CFILES = $(wildcard $(SRC_DIR)/*.c)
+ASMFILES = $(wildcard $(SRC_DIR)/*.S) $(wildcard $(BOOTING_DIR)/*.S)
+OFILES = $(CFILES:.c=.o) $(ASMFILES:.S=.o)
+INCLUDES = -I$(INCLUDE_DIR)
+GCCFLAGS = -Wall -O0 -ffreestanding -nostdinc -nostdlib -nostartfiles $(INCLUDES)
+LDFLAGS = -nostdlib $(INCLUDES)
 
-# Targets
-all: kernel8.img
+all: clean $(BUILD_DIR)/kernel8.img
 
-# Assembly source file
-$(ARCH_DIR)/%.o: $(ARCH_DIR)/%.S
-	$(GCCPATH)/aarch64-none-elf-gcc -Wall -nostdlib -nostartfiles -ffreestanding -g -I$(ARCH_DIR) -c $< -o $@
+# Create boot.S
+$(BUILD_DIR)/boot.o: $(BOOTING_DIR)/boot.S
+	$(TOOLCHAIN_PATH)/$(ASM) $(GCCFLAGS) -c $< -o $@
 
-$(LIB_DIR)/%.o: $(LIB_DIR)/%.S
-	$(GCCPATH)/aarch64-none-elf-gcc $(GCCFLAGS) -c $< -o $@
+# All C to o
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+	$(TOOLCHAIN_PATH)/$(CXX) $(GCCFLAGS) -c $< -o $@
 
-# C source files
-$(SRC_DIR)/%.o: $(SRC_DIR)/%.c
-	$(GCCPATH)/aarch64-none-elf-gcc $(GCCFLAGS) -c $< -o $@
+# All S to o
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.S
+	$(TOOLCHAIN_PATH)/$(ASM) $(GCCFLAGS) -c $< -o $@
 
-$(ARCH_DIR)/%.o: $(ARCH_DIR)/%.c
-	$(GCCPATH)/aarch64-none-elf-gcc $(GCCFLAGS) -c $< -o $@
+$(BUILD_DIR)/%.o: $(BOOTING_DIR)/%.S
+	$(TOOLCHAIN_PATH)/$(ASM) $(GCCFLAGS) -c $< -o $@
 
-$(LIB_DIR)/%.o: $(LIB_DIR)/%.c
-	$(GCCPATH)/aarch64-none-elf-gcc $(GCCFLAGS) -c $< -o $@
+$(BUILD_DIR)/kernel8.img: $(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o
+	$(TOOLCHAIN_PATH)/$(LINKER) $(LDFLAGS) $(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel.o -T $(BOOTING_DIR)/link.ld -o $(BUILD_DIR)/kernel8.elf
+	$(TOOLCHAIN_PATH)/$(OBJCPY) -O binary $(BUILD_DIR)/kernel8.elf $(BUILD_DIR)/kernel8.img
 
-# Link the kernel
-kernel8.img: $(ARCH_DIR)/boot.o $(OFILES)
-	$(GCCPATH)/aarch64-none-elf-ld -nostdlib $(ARCH_DIR)/boot.o $(OFILES) -T $(ARCH_DIR)/link.ld -o kernel8.elf
-	$(GCCPATH)/aarch64-none-elf-objcopy -O binary kernel8.elf kernel8.img
-
-# Clean up
 clean:
-	/bin/rm -f kernel8.elf $(ARCH_DIR)/*.o $(SRC_DIR)/*.o $(LIB_DIR)/*.o kernel8.img > /dev/null 2>&1 || true
+	rm -rf $(BUILD_DIR)/kernel8.img
+	rm -rf $(BUILD_DIR)/boot.o $(BUILD_DIR)/kernel8.elf $(OFILES)

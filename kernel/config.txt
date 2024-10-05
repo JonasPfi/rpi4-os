@@ -1,0 +1,14 @@
+# additionally you need on sd card tihs boot files:
+# - a fresh eeprom boot (coming from recover4.bin)
+# - a start4.elf
+# - a fixup4.dat
+# - a bcm2711-rpi-4-b.dtb
+# - your compiled kernel8.img
+
+[pi4]
+# with kernel8.img this should be enabled since year 2020 boot files
+enable_gic=1
+
+[all]
+# Display Monitor Timings and is the standard that is typically used by monitors
+hdmi_group=2
