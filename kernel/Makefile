@@ -6,7 +6,8 @@ LIB_DIR := lib
 
 # Source files
 CFILES := $(wildcard $(SRC_DIR)/*.c) $(wildcard $(ARCH_DIR)/*.c) $(wildcard $(LIB_DIR)/*.c)
-OFILES := $(CFILES:.c=.o)
+SFILES := $(wildcard $(ARCH_DIR)/*.S) $(wildcard $(LIB_DIR)/*.S)
+OFILES := $(CFILES:.c=.o) $(SFILES:.S=.o)
 
 # Compiler and flags
 GCCFLAGS := -Wall -nostdlib -nostartfiles -ffreestanding -g -I$(INC_DIR)
@@ -20,7 +21,7 @@ $(ARCH_DIR)/%.o: $(ARCH_DIR)/%.S
 	$(GCCPATH)/aarch64-none-elf-gcc -Wall -nostdlib -nostartfiles -ffreestanding -g -I$(ARCH_DIR) -c $< -o $@
 
 $(LIB_DIR)/%.o: $(LIB_DIR)/%.S
-	$(GCCPATH)/aarch64-none-elf-gcc -Wall -nostdlib -nostartfiles -ffreestanding -g $(CCFLAGS) -c $< -o $@
+	$(GCCPATH)/aarch64-none-elf-gcc $(GCCFLAGS) -c $< -o $@
 
 # C source files
 $(SRC_DIR)/%.o: $(SRC_DIR)/%.c
