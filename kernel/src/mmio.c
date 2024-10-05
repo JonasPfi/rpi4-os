@@ -17,4 +17,3 @@ unsigned int get_el(void) {
     );
     return el;
 }
-

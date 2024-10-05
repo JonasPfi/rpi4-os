@@ -12,7 +12,7 @@ fi
 make
 
 # Move the resulting kernel image to the build directory
-mv kernel8.img ../build/
+mv build/kernel8.img ../build/
 
 make clean
 
