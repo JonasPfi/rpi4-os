@@ -16,8 +16,11 @@ GCCPATH := /usr/share/gcc-arm-10.3-2021.07-x86_64-aarch64-none-elf/bin
 all: kernel8.img
 
 # Assembly source file
-$(ARCH_DIR)/boot.o: $(ARCH_DIR)/boot.S
+$(ARCH_DIR)/%.o: $(ARCH_DIR)/%.S
 	$(GCCPATH)/aarch64-none-elf-gcc -Wall -nostdlib -nostartfiles -ffreestanding -g -I$(ARCH_DIR) -c $< -o $@
+
+$(LIB_DIR)/%.o: $(LIB_DIR)/%.S
+	$(GCCPATH)/aarch64-none-elf-gcc -Wall -nostdlib -nostartfiles -ffreestanding -g $(CCFLAGS) -c $< -o $@
 
 # C source files
 $(SRC_DIR)/%.o: $(SRC_DIR)/%.c

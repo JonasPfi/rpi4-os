@@ -1,4 +1,5 @@
 #include "sysregs.h"
+#include "mm.h"
 
 .section ".text.boot"  // Make sure the linker puts this at the start of the kernel image
 
@@ -16,12 +17,6 @@ _start:
 
     // Initialize SP_EL1
     msr     sp_el1, x1            // Set stack pointer for EL1
-
-    // Enable CNTP for EL1
-    mrs     x0, cnthctl_el2       // Read CNTP control from EL2
-    orr     x0, x0, #3            // Set the counter enable bits
-    msr     cnthctl_el2, x0       // Write back to CNTP control
-    msr     cnthp_ctl_el2, xzr     // Disable CNTHP control
 
     // Initialize virtual MPIDR
     mrs     x0, midr_el1          // Read MIDR from EL1
@@ -60,8 +55,7 @@ _start:
 
 el1_entry:
     // Set stack to start below our code
-    ldr     x1, =_start
-    mov     sp, x1
+    mov     sp, #LOW_MEMORY
 
     // Clean the BSS section
     ldr     x1, =__bss_start     // Start address
