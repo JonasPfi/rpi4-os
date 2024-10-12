@@ -20,15 +20,18 @@ void main () {
 
     int el = get_el();
     printf("Exception level: %d \r\n", el);
-
-    timer_start();
+    int t_start = 0;
 
     // the main loop ---------------------------------
-    unsigned long long x=1;
+    unsigned long long x=0;
     while (1) {
         if (x%5000000 == 0) {
             // we are in the main loop
             printf("m");
+            if(t_start==0){
+                timer_start();
+                t_start=1
+            }
         }
         x++;
     }

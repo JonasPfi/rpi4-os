@@ -50,7 +50,6 @@ void gic_init(void) {
 void interrupts_init(void) {
     disable_irq();
     gic_init(); // Initialize GIC
-    timer_init(); // Initialize timer
 }
 
 void enable_irq(void) {
