@@ -3,6 +3,8 @@
 
 void gic_init(void);
 void interrupts_init(void);
+void enable_irq(void);
+void disable_irq(void);
 
 extern void dispatch (void);
 

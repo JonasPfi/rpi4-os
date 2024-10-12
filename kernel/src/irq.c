@@ -48,8 +48,15 @@ void gic_init(void) {
 
 // Initialize interrupts
 void interrupts_init(void) {
-    asm volatile("msr daifset, #2"); // Disable interrupts
+    disable_irq();
     gic_init(); // Initialize GIC
     timer_init(); // Initialize timer
+}
+
+void enable_irq(void) {
     asm volatile("msr daifclr, #2"); // Enable interrupts
+}
+
+void disable_irq(void) {
+    asm volatile("msr daifset, #2"); // Disable interrupts
 }

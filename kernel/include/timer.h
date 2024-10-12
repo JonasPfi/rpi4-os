@@ -1,6 +1,10 @@
 #ifndef TIMER_H
 #define TIMER_H
 
+void timer_init(void);
+void timer_handler(void);
+void timer_start(void);
+
 // Pi4 B, BCM2711, 4MB Base Addresses
 #define MMIO_BASE       0xFE000000
 
@@ -29,8 +33,5 @@
 #define GICC_PRIO       (GICC_BASE + 0x004)
 #define GICC_ACK        (GICC_BASE + 0x00c)
 #define GICC_EOI        (GICC_BASE + 0x010)
-
-void timer_init(void);
-void timer_handler(void);
 
 #endif // TIMER_H
