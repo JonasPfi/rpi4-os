@@ -2,6 +2,7 @@
 #include "uart.h"
 #include "printf.h"
 #include "mmio.h"
+#include "timer.h"
 
 // a properly aligned message buffer with: 9x4 byte long mes-
 // sage setting feature PL011 UART Clock to 3MHz (and some TAGs and
@@ -18,9 +19,7 @@ void dispatch (void) {
     
     while (spi != GIC_SPURIOUS) { // loop until no SPIs are pending on GIC
         if (spi == PIT_SPI) {
-            printf("t");
-            mmio_write(PIT_Compare3, mmio_read(PIT_LOW) + 5000000); // next in 5sec
-            mmio_write(PIT_STATUS, 1 << PIT_MASKBIT); // clear IRQ in System Timer chip
+            timer_handler();
         }
         // clear the pending
         mmio_write(GICC_EOI, spi);
@@ -78,9 +77,7 @@ void main () {
     gic_init();
 
     // PIT plugin (System Timer)
-    mmio_write(GICD_ENABLE + 4 * (PIT_SPI / 32), 1 << (PIT_SPI % 32));
-    mmio_write(PIT_Compare3, 12000000); // inital first IRQ in 12sec
-    mmio_write(PIT_STATUS, 1 << PIT_MASKBIT);
+    timer_init();
 
     // IRQs on
     asm volatile( "msr daifclr, #2" ); 
