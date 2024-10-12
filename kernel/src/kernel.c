@@ -2,7 +2,7 @@
 #include "uart.h"
 #include "printf.h"
 #include "mmio.h"
-#include "timer.h"
+#include "irq.h"
 
 // a properly aligned message buffer with: 9x4 byte long mes-
 // sage setting feature PL011 UART Clock to 3MHz (and some TAGs and
@@ -12,58 +12,6 @@ volatile unsigned int __attribute__((aligned(16))) mbox[9] = { 36, 0, 0x38002, 1
 unsigned long _regs[38];
 
 
-void dispatch (void) {
-    // get one of the pending "Shared Peripheral Interrupt"
-    unsigned int spi =  mmio_read(GICC_ACK);
-    printf("i");
-    
-    while (spi != GIC_SPURIOUS) { // loop until no SPIs are pending on GIC
-        if (spi == PIT_SPI) {
-            timer_handler();
-        }
-        // clear the pending
-        mmio_write(GICC_EOI, spi);
-        // get the next
-        spi =  mmio_read(GICC_ACK);
-    }
-}
-
-
-// initialize GIC-400
-void gic_init (void) {
-    unsigned int i;
-
-    // disable Distributor and CPU interface
-    mmio_write(GICD_CTLR, 0);
-    mmio_write(GICC_CTLR, 0);
-
-    // disable, acknowledge and deactivate all interrupts
-    for (i = 0; i < (GIC_IRQS/32); ++i) {
-        mmio_write(GICD_DISABLE     + 4*i, ~0);
-        mmio_write(GICD_PEND_CLR    + 4*i, ~0);
-        mmio_write(GICD_ACTIVE_CLR  + 4*i, ~0);
-    }
-
-    // direct all interrupts to core 0 (=01) with default priority a0
-    for (i = 0; i < (GIC_IRQS/4); ++i) {
-        mmio_write(GICD_TARGET + 4*i, 0x01010101);
-        mmio_write(GICD_PRIO   + 4*i, 0xa0a0a0a0);
-    }
-
-    // config all interrupts to level triggered
-    for (i = 0; i < (GIC_IRQS/16); ++i) {
-        mmio_write(GICD_CFG + 4*i, 0);
-    }
-
-    // enable Distributor
-    mmio_write(GICD_CTLR, 1);
-
-    // set Core0 interrupts mask theshold prio to F0, to react on higher prio a0
-    mmio_write(GICC_PRIO, 0xF0);
-    // enable CPU interface
-    mmio_write(GICC_CTLR, 1);
-}
-
 void main () {
     uart_init();
     init_printf(0, putc);
@@ -71,16 +19,8 @@ void main () {
     int el = get_el();
     printf("Exception level: %d \r\n", el);
 
-    // interrupts off/mask
-    asm volatile( "msr daifset, #2" );
-
-    gic_init();
-
-    // PIT plugin (System Timer)
-    timer_init();
-
-    // IRQs on
-    asm volatile( "msr daifclr, #2" ); 
+    // Initialize interrupts
+    interrupts_init();
 
     // the main loop ---------------------------------
     unsigned long long x=0;
