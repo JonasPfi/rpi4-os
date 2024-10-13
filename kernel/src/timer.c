@@ -2,8 +2,9 @@
 #include "timer.h"
 #include "printf.h"
 #include "irq.h"
+#include "scheduler.h"
 
-int timer_frq = 5000000;
+int timer_frq = 200000;
 
 void timer_init(void) {
     mmio_write(GICD_ENABLE + 4 * (PIT_SPI / 32), 1 << (PIT_SPI % 32));
@@ -21,4 +22,5 @@ void timer_handler(void) {
     printf("t");
     mmio_write(PIT_Compare3, mmio_read(PIT_LOW) + timer_frq);
     mmio_write(PIT_STATUS, 1 << PIT_MASKBIT);
+    timer_tick();
 }

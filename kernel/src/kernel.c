@@ -1,17 +1,24 @@
+#include "utils.h"
 #include "kernel.h"
 #include "uart.h"
 #include "printf.h"
 #include "mmio.h"
 #include "irq.h"
 #include "timer.h"
-
-// a properly aligned message buffer with: 9x4 byte long mes-
-// sage setting feature PL011 UART Clock to 3MHz (and some TAGs and
-// sizes of parameter in message)
-volatile unsigned int __attribute__((aligned(16))) mbox[9] = { 36, 0, 0x38002, 12, 8, 2, 3000000, 0, 0 };
+#include "scheduler.h"
+#include "fork.h"
 
 unsigned long _regs[38];
 
+void process(char *array)
+{
+	while (1){
+		for (int i = 0; i < 5; i++){
+			uart_writeByteBlockingActual(array[i]);
+			delay(500000);
+		}
+	}
+}
 
 void main () {
     uart_init();
@@ -19,17 +26,23 @@ void main () {
     interrupts_init();
 
     int el = get_el();
-    printf("Exception level: %d \r\n", el);
+    printf("\nException level: %d \r\n", el);
 
     timer_start();
 
+	int res = copy_process((unsigned long)&process, (unsigned long)"12345");
+	if (res != 0) {
+		printf("error while starting process 1");
+		return;
+	}
+	res = copy_process((unsigned long)&process, (unsigned long)"abcde");
+	if (res != 0) {
+		printf("error while starting process 2");
+		return;
+	}
+
     // the main loop ---------------------------------
-    unsigned long long x=1;
     while (1) {
-        if (x%5000000 == 0) {
-            // we are in the main loop
-            printf("m");
-        }
-        x++;
+        schedule();
     }
 }

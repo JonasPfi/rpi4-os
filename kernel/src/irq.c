@@ -6,7 +6,6 @@
 // Dispatch function for interrupts
 void dispatch(void) {
     unsigned int spi = mmio_read(GICC_ACK);
-    printf("ir_");
     while (spi != GIC_SPURIOUS) { // Loop until no SPIs are pending
         if (spi == PIT_SPI) {
             timer_handler(); // Call the timer handler
@@ -52,10 +51,3 @@ void interrupts_init(void) {
     gic_init(); // Initialize GIC
 }
 
-void enable_irq(void) {
-    asm volatile("msr daifclr, #2"); // Enable interrupts
-}
-
-void disable_irq(void) {
-    asm volatile("msr daifset, #2"); // Disable interrupts
-}
