@@ -1,3 +1,5 @@
+#include "uart.h"
+
 .section ".text.boot"
 .global _regs_save
 .global _regs_load

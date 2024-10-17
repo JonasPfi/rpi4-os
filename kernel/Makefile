@@ -1,6 +1,6 @@
 ARMGNU ?= aarch64-elf
 
-COPS = -Wall -nostdlib -nostartfiles -ffreestanding -Iinclude -mgeneral-regs-only
+COPS = -Wall -nostartfiles -ffreestanding -Iinclude -mgeneral-regs-only
 ASMOPS = -Iinclude
 
 BUILD_DIR = build

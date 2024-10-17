@@ -1,4 +1,7 @@
+#include "uart.h"
+
 .section ".text.boot"
+
 .global _vectors
 
     .balign 0x800   // vector must be propper aligned!

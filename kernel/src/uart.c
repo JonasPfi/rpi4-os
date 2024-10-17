@@ -59,3 +59,6 @@ void uart_writeText(char *buffer) {
 void putc(void* p, char c) {
     uart_writeByteBlockingActual(c);
 }
+void debug_print(){
+    uart_writeText("Debug!\n\r");
+}

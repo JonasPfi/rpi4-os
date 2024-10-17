@@ -3,7 +3,6 @@
 
 void timer_init(void);
 void timer_handler(void);
-void timer_start(void);
 
 // Pi4 B, BCM2711, 4MB Base Addresses
 #define MMIO_BASE       0xFE000000
