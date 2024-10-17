@@ -12,7 +12,7 @@ void timer_init(void) {
 }
 
 void timer_handler(void) {
-    printf("t");
+    printf("t ");
     mmio_write(PIT_Compare3, mmio_read(PIT_LOW) + timer_frq);
     mmio_write(PIT_STATUS, 1 << PIT_MASKBIT);
 }

@@ -9,9 +9,9 @@ void dispatch(void) {
     unsigned int spi = mmio_read(GICC_ACK);
     while (spi != GIC_SPURIOUS) { // Loop until no SPIs are pending
         if (spi == PIT_SPI) {
+            timer_handler(); // Call the timer handler
             mmio_write(GICC_EOI, spi); // Signal the end of the interrupt
             spi = mmio_read(GICC_ACK); // Get the next interrupt
-            timer_handler(); // Call the timer handler
         }
     }
 }
