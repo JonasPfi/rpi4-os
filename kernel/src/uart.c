@@ -61,4 +61,5 @@ void putc(void* p, char c) {
 }
 void debug_print(){
     uart_writeText("Debug!\n\r");
+    return;
 }

@@ -5,30 +5,21 @@
 #include "mmio.h"
 #include "irq.h"
 #include "timer.h"
+#include "scheduler.h"
+#include "fork.h"
 
 unsigned long _regs[38];
 
-void process_1()
+void process(char *array)
 {
-    char *array = "12345";
 	while (1){
 		for (int i = 0; i < 5; i++){
 			uart_writeByteBlockingActual(array[i]);
-			delay(500000);
+			delay(100000);
 		}
 	}
 }
 
-void process_2()
-{
-    char *array = "abcde";
-    while (1){
-        for (int i = 0; i < 5; i++){
-            uart_writeByteBlockingActual(array[i]);
-            delay(500000);
-        }
-    }
-}
 
 void main () {
     uart_init();
@@ -43,7 +34,25 @@ void main () {
     enable_irq();
 
 
+	int res = copy_process((unsigned long)&process, (unsigned long)"12345");
+	if (res != 0) {
+		printf("error while starting process 1");
+		return;
+	}
+	res = copy_process((unsigned long)&process, (unsigned long)"abcde");
+	if (res != 0) {
+		printf("error while starting process 2");
+		return;
+	}
+    res = copy_process((unsigned long)&process, (unsigned long)"67890");
+    if (res != 0) {
+        printf("error while starting process 3");
+        return;
+    }
+
+
     // the main loop ---------------------------------
     while (1) {
+        schedule();
     }
 }
