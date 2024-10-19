@@ -1,5 +1,4 @@
 #include "utils.h"
-#include "kernel.h"
 #include "uart.h"
 #include "printf.h"
 #include "mmio.h"
@@ -7,8 +6,6 @@
 #include "timer.h"
 #include "scheduler.h"
 #include "fork.h"
-
-unsigned long _regs[38];
 
 void process(char *array)
 {
