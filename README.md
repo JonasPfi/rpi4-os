@@ -52,6 +52,7 @@ To enable UART on the Pi, follow these steps:
 2. Add the following lines to enable UART:
 
    ```bash
+   enable_uart=1
    enable_gic=1
    hdmi_group=1
    hdmi_mode=16
