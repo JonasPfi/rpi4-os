@@ -28,7 +28,7 @@ void main () {
     interrupts_init();
 
     int el = get_el();
-    printf("\nException level: %d \r\n", el);
+    printf("\n\rException level: %d \r\n", el);
 
     timer_init();
     enable_irq();

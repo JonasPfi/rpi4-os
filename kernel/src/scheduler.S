@@ -3,6 +3,8 @@
 
 .globl cpu_switch_to
 cpu_switch_to:
+    mrs x10, daif
+
     mov x10, #THREAD_CPU_CONTEXT
     add x8, x0, x10
     mov x9, sp
@@ -38,5 +40,7 @@ cpu_switch_to:
     ldr x9, [x8], #8
     ldr x30, [x8]
 
+
+    msr daif, x10
     mov sp, x9
     ret

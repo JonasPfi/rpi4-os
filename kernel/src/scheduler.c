@@ -1,6 +1,7 @@
 #include "scheduler.h"
 #include "irq.h"
 #include "printf.h"
+#include "timer.h"
 
 static struct task_struct init_task = INIT_TASK;
 struct task_struct *current = &(init_task);
@@ -74,7 +75,7 @@ void timer_tick()
 		return;
 	}
 	current->counter=0;
-	enable_irq();
+//    enable_irq();
 	_schedule();
-	disable_irq();
+//    disable_irq();
 }
