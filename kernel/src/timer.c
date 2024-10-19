@@ -4,7 +4,7 @@
 #include "irq.h"
 #include "scheduler.h"
 
-int timer_frq = 2000000;
+int timer_frq = 200000;
 
 void timer_init(void) {
     mmio_write(GICD_ENABLE + 4 * (PIT_SPI / 32), 1 << (PIT_SPI % 32));

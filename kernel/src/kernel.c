@@ -44,12 +44,6 @@ void main () {
 		printf("error while starting process 2");
 		return;
 	}
-    res = copy_process((unsigned long)&process, (unsigned long)"67890");
-    if (res != 0) {
-        printf("error while starting process 3");
-        return;
-    }
-
 
     // the main loop ---------------------------------
     while (1) {
