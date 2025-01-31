@@ -2,9 +2,9 @@
 #define PMU_H
 
 void init_pmu(void);
-unsigned long read_instruction_count(void);
-void reset_instruction_count(void);
-void disable_pmu_counter(void);
-void enable_pmu_counter(void);
+unsigned long read_pmu_counter(int counter);
+void reset_pmu_counters(void);
+void disable_pmu_counters(void);
+void enable_pmu_counters(void);
 
 #endif

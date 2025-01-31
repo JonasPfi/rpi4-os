@@ -22,10 +22,9 @@ void process_high_power(char *array)
 {
     while (1) {
         for (int i = 0; i < 5; i++) {
-            // Intensivere Berechnungen oder Anweisungen für höheren Stromverbrauch
-            for (volatile int j = 0; j < 100000; j++);  // Dummy loop for additional load
+            for (volatile int j = 0; j < 100000; j++);
             uart_writeByteBlockingActual(array[i]);
-            delay(50000);  // Kürzeres Delay, um häufiger aktiv zu sein
+            delay(50000);
         }
     }
 }
@@ -35,7 +34,7 @@ void process_low_power(char *array)
     while (1) {
         for (int i = 0; i < 5; i++) {
             uart_writeByteBlockingActual(array[i]);
-            delay(200000);  // Längeres Delay für weniger aktive Perioden
+            delay(200000);
         }
     }
 }
@@ -55,24 +54,13 @@ void main () {
     enable_irq();
 
     init_pmu();
-    unsigned long current_count;
-    current_count = read_instruction_count();
-    printf("Current instructions counted: %d\n\r", current_count);
-    reset_instruction_count();
+    enable_pmu_counters();
 
 	int res = copy_process((unsigned long)&process_low_power, (unsigned long)"12345");
 	if (res != 0) {
 		printf("error while starting process 1");
 		return;
 	}
-
-    current_count = read_instruction_count();
-    printf("Current instructions counted: %d\n\r", current_count);
-    reset_instruction_count();
-
-    current_count = read_instruction_count();
-    printf("Current instructions counted: %d\n\r", current_count);
-    reset_instruction_count();
 
 	res = copy_process((unsigned long)&process_high_power, (unsigned long)"abcde");
 	if (res != 0) {
