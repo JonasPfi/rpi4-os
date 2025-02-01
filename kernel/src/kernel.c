@@ -12,33 +12,11 @@ void process(char *array)
 {
 	while (1){
 		for (int i = 0; i < 5; i++){
-			uart_writeByteBlockingActual(array[i]);
+//			uart_writeByteBlockingActual(array[i]);
 			delay(100000);
 		}
 	}
 }
-
-void process_high_power(char *array)
-{
-    while (1) {
-        for (int i = 0; i < 5; i++) {
-            for (volatile int j = 0; j < 100000; j++);
-            uart_writeByteBlockingActual(array[i]);
-            delay(50000);
-        }
-    }
-}
-
-void process_low_power(char *array)
-{
-    while (1) {
-        for (int i = 0; i < 5; i++) {
-            uart_writeByteBlockingActual(array[i]);
-            delay(200000);
-        }
-    }
-}
-
 
 void main () {
     uart_init();
@@ -56,13 +34,13 @@ void main () {
     init_pmu();
     enable_pmu_counters();
 
-	int res = copy_process((unsigned long)&process_low_power, (unsigned long)"12345");
+	int res = copy_process((unsigned long)&process, (unsigned long)"12345");
 	if (res != 0) {
 		printf("error while starting process 1");
 		return;
 	}
 
-	res = copy_process((unsigned long)&process_high_power, (unsigned long)"abcde");
+	res = copy_process((unsigned long)&process, (unsigned long)"abcde");
 	if (res != 0) {
 		printf("error while starting process 2");
 		return;
@@ -70,6 +48,6 @@ void main () {
 
     // the main loop ---------------------------------
     while (1) {
-        schedule();
+       schedule();
     }
 }
