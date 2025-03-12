@@ -33,7 +33,7 @@ void update_energy_usage(struct task_struct *task) {
     unsigned long energy_used = energy_used_inst + energy_used_mem + STATIC_ENERGY_PER_TICK;
 
     // Addiere den aktuellen Verbrauch zur Gesamtstatistik der Task
-    task->energy_consumed += energy_used;
+    task->energy_consumed = energy_used;
     total_energy_consumed += energy_used;
     executed_tasks++;
 
@@ -53,9 +53,9 @@ void update_task_priorities() {
         struct task_struct *p = task[i];
         if (!p) continue;
 
-        long deviation = ((p->energy_consumed - avg_energy) * 100) / avg_energy;
-
-        if (deviation >= -5 && deviation <= 5) {
+	long deviation = ((long)p->energy_consumed - (long)avg_energy) * 100 / (long)avg_energy;
+        
+	if (deviation >= -5 && deviation <= 5) {
             p->priority = 3;
             p->quota = 2;
         } else if (deviation > 5 && deviation <= 10) {
