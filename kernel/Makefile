@@ -1,4 +1,4 @@
-ARMGNU ?= aarch64-elf
+ARMGNU ?= aarch64-none-elf
 
 COPS = -Wall -nostartfiles -ffreestanding -Iinclude -mgeneral-regs-only
 ASMOPS = -Iinclude
