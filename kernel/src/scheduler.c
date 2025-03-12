@@ -3,8 +3,8 @@
 #include "printf.h"
 #include "pmu.h"
 #include "timer.h"
-#define TIMER_FREQUENCY 1// Hz (TICKS PRO SEKUNDE)
-#define STATIC_ENERGY_PER_TICK (2195 / TIMER_FREQUENCY) // in mW
+#define TIMER_FREQUENCY 1// Hz
+#define STATIC_ENERGY_PER_TICK (2195 / TIMER_FREQUENCY) // mW
 
 static struct task_struct init_task = INIT_TASK;
 struct task_struct *current = &(init_task);
@@ -25,16 +25,14 @@ void calculate_energy_consumption() {
     unsigned long inst_retired = read_pmu_counter(1);
     unsigned long mem_access = read_pmu_counter(3);
 
-    // Fixpunkt-Arithmetik mit höherer Präzision
-    unsigned long energy_used_inst = (inst_retired * 45) / 10000000UL;  // Skaliert für bessere Präzision
-    unsigned long energy_used_mem = (mem_access * 275) / 10000000UL;  // Skaliert für bessere Präzision
+    unsigned long energy_used_inst = (inst_retired * 45) / 10000000UL;  
+    unsigned long energy_used_mem = (mem_access * 275) / 10000000UL;
 
     unsigned long energy_used = energy_used_inst + energy_used_mem;
 
-    // Statischer Verbrauch einbeziehen (angenommen STATIC_ENERGY_PER_TICK ist in mW)
-    energy_used += STATIC_ENERGY_PER_TICK; // Da STATIC_ENERGY_PER_TICK bereits in mW ist
+    energy_used += STATIC_ENERGY_PER_TICK; 
 
-    printf("Energy consumed: %u mW\n\r", energy_used); // Ausgabe direkt in mW
+    printf("Energy consumed: %u mW\n\r", energy_used);
     reset_pmu_counters();
 }
 
@@ -95,7 +93,5 @@ void timer_tick()
 		return;
 	}
 	current->counter=0;
-//    enable_irq();
 	_schedule();
-//    disable_irq();
 }
