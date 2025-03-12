@@ -11,8 +11,8 @@ struct task_struct *current = &(init_task);
 struct task_struct * task[NR_TASKS] = {&(init_task), };
 int nr_tasks = 1;
 unsigned long total_energy_consumed = 0; // Gesamtenergieverbrauch aller Tasks
-int executed_tasks = 0; // Anzahl der Tasks, die Energie verbraucht haben
-int current_cycle_quota = 0; // Anzahl der bereits vergebenen Zeitscheiben im aktuellen Zyklus
+int executed_tasks = 0; // Counts tasks executed in current cycle
+int current_cycle_quota = 0; // Passed quotas in current cycle
 
 void preempt_disable(void)
 {
@@ -32,12 +32,10 @@ void update_energy_usage(struct task_struct *task) {
     unsigned long energy_used_mem = (mem_access * 275) / 10000000UL;
     unsigned long energy_used = energy_used_inst + energy_used_mem + STATIC_ENERGY_PER_TICK;
 
-    // Addiere den aktuellen Verbrauch zur Gesamtstatistik der Task
     task->energy_consumed = energy_used;
     total_energy_consumed += energy_used;
     executed_tasks++;
 
-    // Gib den Energieverbrauch dieser Task für dieses Quota aus
     printf("Task %d: Used %u mW in this quota (Total: %u mW)\n\r",
            task->id, energy_used, task->energy_consumed);
 
@@ -72,7 +70,7 @@ void update_task_priorities() {
             p->quota = 4;
         }
 
-        p->remaining_quota = p->quota; // Zeitscheiben für neuen Zyklus zurücksetzen
+        p->remaining_quota = p->quota;
 
         printf("Task %d: Energy %u mW, Deviation %d%%, Priority %d, Quota %d\n\r", 
                i, p->energy_consumed, deviation, p->priority, p->quota);
@@ -120,7 +118,7 @@ void _schedule(void) {
             break;
         }
 
-        update_task_priorities(); // Falls alle Quoten aufgebraucht sind, Zyklus neu starten
+        update_task_priorities(); 
     }
 
     switch_to(next_task);

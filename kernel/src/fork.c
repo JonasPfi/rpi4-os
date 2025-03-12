@@ -20,9 +20,9 @@ int copy_process(unsigned long fn, unsigned long arg)
 	p->cpu_context.pc = (unsigned long)ret_from_fork;
 	p->cpu_context.sp = (unsigned long)p + THREAD_SIZE;
 	
-	p->energy_consumed = 0;  // Neue Tasks haben noch keinen Verbrauch
-        p->quota = current->quota; // Erbt die Quota der Eltern-Task
-        p->remaining_quota = p->quota; // Startet mit voller Quota
+	p->energy_consumed = 0;
+        p->quota = current->quota;
+        p->remaining_quota = p->quota;
 	
 	int pid = nr_tasks++;
 	task[pid] = p;
