@@ -35,13 +35,18 @@ struct cpu_context {
 };
 
 struct task_struct {
-	struct cpu_context cpu_context;
-	long state;	
-	long counter;
-	long priority;
-	long preempt_count;
+    struct cpu_context cpu_context;
+    long state;
+    long counter;
+    long priority;         // Dynamische Priorität basierend auf Energieverbrauch
+    long preempt_count;
+    unsigned long energy_consumed; // Verbrauch im letzten Zyklus (mW)
+    int quota;             // Maximale Zeitscheiben pro Zyklus
+    int remaining_quota;   // Verfügbare Zeitscheiben im aktuellen Zyklus
+    int id;
 };
 
+extern unsigned long get_average_energy(void);
 extern void sched_init(void);
 extern void schedule(void);
 extern void timer_tick(void);
