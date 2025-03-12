@@ -5,7 +5,7 @@
 #include "scheduler.h"
 #include "pmu.h"
 
-int timer_frq = 1000000;
+int timer_frq = 10000;
 
 void timer_init(void) {
     mmio_write(GICD_ENABLE + 4 * (PIT_SPI / 32), 1 << (PIT_SPI % 32));
