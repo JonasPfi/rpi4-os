@@ -109,7 +109,7 @@ void main () {
         return;
     }
 
-	res = copy_process((unsigned long)&process_complex_calculations, (unsigned long)"");
+	res = copy_process((unsigned long)&process_idle, (unsigned long)"");
 	if (res != 0) {
 		printf("error while starting process 1");
 		return;
