@@ -109,11 +109,11 @@ void main () {
         return;
     }
 
-	res = copy_process((unsigned long)&process_idle, (unsigned long)"");
-	if (res != 0) {
-		printf("error while starting process 1");
-		return;
-	}
+    res = copy_process((unsigned long)&process_idle, (unsigned long)"");
+    if (res != 0) {
+	printf("error while starting process 1");
+	return;
+    }
 
     res = copy_process((unsigned long)&process_memory_accesses, (unsigned long)"");
     if (res != 0) {
@@ -122,6 +122,12 @@ void main () {
     }
 
     res = copy_process((unsigned long)&process_branch_mispredictions, (unsigned long)"");
+    if (res != 0) {
+        printf("error while starting process 1");
+        return;
+    }
+
+    res = copy_process((unsigned long)&process_idle, (unsigned long)"");
     if (res != 0) {
         printf("error while starting process 1");
         return;

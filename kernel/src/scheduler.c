@@ -3,14 +3,13 @@
 #include "printf.h"
 #include "pmu.h"
 #include "timer.h"
-#define TIMER_FREQUENCY 1// Hz
-#define STATIC_ENERGY_PER_TICK (2195 / TIMER_FREQUENCY) // mW
-
+#define TIMER_FREQUENCY 10// Hz
+#define STATIC_ENERGY_PER_TICK (((unsigned long)2195 * 1000000UL) / TIMER_FREQUENCY) // nW
 static struct task_struct init_task = INIT_TASK;
 struct task_struct *current = &(init_task);
 struct task_struct * task[NR_TASKS] = {&(init_task), };
 int nr_tasks = 1;
-unsigned long total_energy_consumed = 0; // Gesamtenergieverbrauch aller Tasks
+unsigned long total_energy_consumed = 0; 
 int executed_tasks = 0; // Counts tasks executed in current cycle
 int current_cycle_quota = 0; // Passed quotas in current cycle
 
@@ -28,15 +27,15 @@ void update_energy_usage(struct task_struct *task) {
     unsigned long inst_retired = read_pmu_counter(1);
     unsigned long mem_access = read_pmu_counter(3);
 
-    unsigned long energy_used_inst = (inst_retired * 45) / 10000000UL;
-    unsigned long energy_used_mem = (mem_access * 275) / 10000000UL;
+    unsigned long energy_used_inst = (inst_retired * 45 * 1000000) / 10000000UL;
+    unsigned long energy_used_mem = (mem_access * 275 * 1000000) / 10000000UL;
     unsigned long energy_used = energy_used_inst + energy_used_mem + STATIC_ENERGY_PER_TICK;
 
-    task->energy_consumed = energy_used;
+    task->energy_consumed += energy_used;
     total_energy_consumed += energy_used;
     executed_tasks++;
 
-    printf("Task %d: Used %u mW in this quota (Total: %u mW)\n\r",
+    printf("Task %d: Used %u nW in this quota (Total: %u nW)\n\r",
            task->id, energy_used, task->energy_consumed);
 
     reset_pmu_counters();
@@ -45,13 +44,13 @@ void update_energy_usage(struct task_struct *task) {
 void update_task_priorities() {
     unsigned long avg_energy = get_average_energy();
 
-    printf("Average energy: %u mW\n\r", avg_energy);
+    printf("Average energy: %u nW\n\r", avg_energy);
 
     for (int i = 1; i < NR_TASKS; i++) {
         struct task_struct *p = task[i];
         if (!p) continue;
 
-	long deviation = ((long)p->energy_consumed - (long)avg_energy) * 100 / (long)avg_energy;
+	long deviation = (((long)p->energy_consumed / p->quota) - (long)avg_energy) * 100 / (long)avg_energy;
         
 	if (deviation >= -5 && deviation <= 5) {
             p->priority = 3;
@@ -72,8 +71,10 @@ void update_task_priorities() {
 
         p->remaining_quota = p->quota;
 
-        printf("Task %d: Energy %u mW, Deviation %d%%, Priority %d, Quota %d\n\r", 
+        printf("Task %d: Energy %u nW, Deviation %d%%, Priority %d, Quota %d\n\r", 
                i, p->energy_consumed, deviation, p->priority, p->quota);
+	
+	p->energy_consumed = 0;
     }
 
     total_energy_consumed = 0;
